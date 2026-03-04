@@ -2290,15 +2290,34 @@
     }
     initReveal();
 
-    function sendForm() {
+    async function sendForm() {
       const n = document.getElementById('cf-name').value.trim();
       const e = document.getElementById('cf-email').value.trim();
       const s = document.getElementById('cf-subject').value.trim();
       const m = document.getElementById('cf-msg').value.trim();
       const note = document.getElementById('form-note');
       if (!n || !e || !m) { note.textContent = '⚠ Lütfen zorunlu alanları doldurun.'; note.style.color = '#FCA311'; return }
-      location.href = 'mailto:contact@tahafurkansen.com.tr?subject=' + encodeURIComponent(s || 'Portföy Sitesi') + '&body=' + encodeURIComponent('Ad: ' + n + '\nE-posta: ' + e + '\n\n' + m);
-      note.textContent = '✓ Mail uygulamanız açılıyor…'; note.style.color = '#FCA311';
+
+      note.textContent = 'Gönderiliyor…'; note.style.color = 'var(--mu)';
+      try {
+        const res = await fetch('/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: n, email: e, subject: s, message: m })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          note.textContent = '✓ Mesajınız iletildi, teşekkürler!'; note.style.color = '#52c06c';
+          document.getElementById('cf-name').value = '';
+          document.getElementById('cf-email').value = '';
+          document.getElementById('cf-subject').value = '';
+          document.getElementById('cf-msg').value = '';
+        } else {
+          note.textContent = '⚠ ' + (data.error || 'Bir hata oluştu.'); note.style.color = '#FCA311';
+        }
+      } catch {
+        note.textContent = '⚠ Bağlantı hatası, lütfen tekrar deneyin.'; note.style.color = '#FCA311';
+      }
     }
   </script>
 </body>

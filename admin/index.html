@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Admin — Taha Furkan Şen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+    :root {
+      --bg: #000; --bg2: #080c14; --sf: #14213D; --sf2: #1c2d52;
+      --bd: #1e2e4a; --bd2: #2a3f65;
+      --tx: #FFF; --tx2: #E5E5E5; --mu: #7a8fa8;
+      --ac: #FCA311; --acd: #d4880e; --abg: rgba(252,163,17,.10);
+      --red: #e05252; --green: #52c06c;
+      --fh: 'Bricolage Grotesque', sans-serif;
+      --fm: 'DM Mono', monospace;
+      --sb: 220px;
+    }
+    html { scroll-behavior: smooth }
+    body { background: var(--bg); color: var(--tx); font-family: var(--fh); min-height: 100vh }
+
+    /* LOGIN */
+    #login-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+      background: var(--bg);
+      background-image: linear-gradient(rgba(252,163,17,.02) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(252,163,17,.02) 1px, transparent 1px);
+      background-size: 52px 52px;
+    }
+    .login-box {
+      width: 100%; max-width: 380px; padding: 2.5rem;
+      background: var(--bg2); border: 1px solid var(--bd);
+      border-radius: 12px;
+    }
+    .login-logo { font-size: 1.3rem; font-weight: 700; color: var(--ac); margin-bottom: .4rem }
+    .login-sub { font-size: .8rem; color: var(--mu); margin-bottom: 2rem; font-family: var(--fm) }
+    .form-field { margin-bottom: 1rem }
+    .form-field label { display: block; font-size: .7rem; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--mu); margin-bottom: .4rem }
+    .form-field input {
+      width: 100%; padding: .7rem 1rem; background: var(--sf); border: 1px solid var(--bd);
+      border-radius: 6px; color: var(--tx); font-family: var(--fm); font-size: .9rem;
+      outline: none; transition: border-color .2s;
+    }
+    .form-field input:focus { border-color: var(--ac) }
+    .btn-login {
+      width: 100%; padding: .8rem; background: var(--ac); color: #000;
+      font-family: var(--fh); font-weight: 700; font-size: .9rem;
+      border: none; border-radius: 6px; cursor: pointer; letter-spacing: .05em;
+      transition: background .2s;
+    }
+    .btn-login:hover { background: var(--acd) }
+    .login-err { color: var(--red); font-size: .82rem; margin-top: .8rem; text-align: center; min-height: 1.2em }
+
+    /* APP LAYOUT */
+    #app { display: none; min-height: 100vh }
+    .layout { display: flex; min-height: 100vh }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sb); flex-shrink: 0; background: var(--bg2);
+      border-right: 1px solid var(--bd); display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 100;
+    }
+    .sb-logo { padding: 1.5rem; border-bottom: 1px solid var(--bd) }
+    .sb-logo-text { font-size: 1rem; font-weight: 700; color: var(--ac) }
+    .sb-logo-sub { font-size: .68rem; color: var(--mu); font-family: var(--fm); margin-top: .15rem }
+    .sb-nav { flex: 1; padding: 1rem 0 }
+    .nav-item {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .65rem 1.5rem; cursor: pointer; transition: background .15s, color .15s;
+      font-size: .88rem; font-weight: 500; color: var(--mu); border-left: 2px solid transparent;
+      user-select: none;
+    }
+    .nav-item:hover { background: var(--sf); color: var(--tx2) }
+    .nav-item.active { background: var(--abg); color: var(--ac); border-left-color: var(--ac) }
+    .nav-icon { font-size: 1rem; width: 1.2rem; text-align: center }
+    .nav-badge {
+      margin-left: auto; background: var(--ac); color: #000; border-radius: 9999px;
+      font-size: .65rem; font-weight: 700; padding: .1em .5em; min-width: 1.4em; text-align: center;
+    }
+    .sb-bottom { padding: 1rem 1.5rem; border-top: 1px solid var(--bd) }
+    .sb-user { font-size: .8rem; color: var(--mu); margin-bottom: .6rem; font-family: var(--fm) }
+    .btn-logout {
+      width: 100%; padding: .5rem; background: transparent; border: 1px solid var(--bd2);
+      color: var(--mu); border-radius: 6px; cursor: pointer; font-size: .8rem;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red) }
+
+    /* MAIN */
+    .main { margin-left: var(--sb); flex: 1; padding: 2rem 2.5rem; max-width: 1100px }
+    .page-header { margin-bottom: 2rem }
+    .page-title { font-size: 1.6rem; font-weight: 700 }
+    .page-sub { color: var(--mu); font-size: .85rem; margin-top: .3rem; font-family: var(--fm) }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem }
+    .stat-card {
+      background: var(--bg2); border: 1px solid var(--bd); border-radius: 10px; padding: 1.2rem 1.5rem;
+    }
+    .stat-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--mu) }
+    .stat-val { font-size: 2rem; font-weight: 700; margin-top: .3rem }
+    .stat-card.unread .stat-val { color: var(--ac) }
+
+    /* TABLE */
+    .card { background: var(--bg2); border: 1px solid var(--bd); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem }
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--bd);
+    }
+    .card-title { font-size: .9rem; font-weight: 700 }
+    table { width: 100%; border-collapse: collapse }
+    th { text-align: left; font-size: .7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--mu); padding: .8rem 1.5rem; border-bottom: 1px solid var(--bd) }
+    td { padding: .8rem 1.5rem; font-size: .85rem; border-bottom: 1px solid rgba(30,46,74,.4);
+      vertical-align: top; max-width: 300px; word-break: break-word }
+    tr:last-child td { border-bottom: none }
+    tr:hover td { background: rgba(255,255,255,.02) }
+    .tag {
+      display: inline-block; font-size: .68rem; font-weight: 600; padding: .2em .6em;
+      border-radius: 4px; font-family: var(--fm);
+    }
+    .tag-green { background: rgba(82,192,108,.15); color: var(--green) }
+    .tag-yellow { background: var(--abg); color: var(--ac) }
+    .tag-gray { background: rgba(122,143,168,.12); color: var(--mu) }
+    .tag-red { background: rgba(224,82,82,.12); color: var(--red) }
+    .msg-unread td:first-child { border-left: 3px solid var(--ac) }
+    .msg-text { max-height: 3.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical }
+    .empty-row td { text-align: center; color: var(--mu); padding: 2rem }
+
+    /* ACTIONS */
+    .act-btn {
+      background: none; border: 1px solid var(--bd); color: var(--mu); border-radius: 5px;
+      padding: .3em .7em; font-size: .75rem; cursor: pointer; transition: all .15s; margin: 0 .15rem;
+    }
+    .act-btn:hover { border-color: var(--ac); color: var(--ac) }
+    .act-btn.danger:hover { border-color: var(--red); color: var(--red) }
+
+    /* BTN PRIMARY */
+    .btn-primary {
+      background: var(--ac); color: #000; border: none; border-radius: 6px;
+      padding: .55rem 1.2rem; font-size: .85rem; font-weight: 700; cursor: pointer;
+      transition: background .15s; font-family: var(--fh);
+    }
+    .btn-primary:hover { background: var(--acd) }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--bd2); color: var(--tx2);
+      border-radius: 6px; padding: .5rem 1rem; font-size: .85rem; cursor: pointer;
+      transition: border-color .15s; font-family: var(--fh);
+    }
+    .btn-ghost:hover { border-color: var(--mu) }
+
+    /* MODAL */
+    .modal-bg {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7);
+      z-index: 999; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-bg.open { display: flex }
+    .modal {
+      background: var(--bg2); border: 1px solid var(--bd); border-radius: 12px;
+      width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--bd); position: sticky; top: 0;
+      background: var(--bg2); z-index: 1;
+    }
+    .modal-title { font-size: 1rem; font-weight: 700 }
+    .modal-close { background: none; border: none; color: var(--mu); font-size: 1.2rem; cursor: pointer; line-height: 1 }
+    .modal-body { padding: 1.5rem }
+    .modal-foot { display: flex; gap: .8rem; justify-content: flex-end; padding: 1rem 1.5rem; border-top: 1px solid var(--bd) }
+    .field { margin-bottom: 1.1rem }
+    .field label { display: block; font-size: .7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--mu); margin-bottom: .4rem }
+    .field input, .field textarea, .field select {
+      width: 100%; padding: .65rem .9rem; background: var(--sf); border: 1px solid var(--bd);
+      border-radius: 6px; color: var(--tx); font-family: var(--fm); font-size: .88rem;
+      outline: none; transition: border-color .2s; resize: vertical;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--ac) }
+    .field textarea { min-height: 120px }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem }
+    .checkbox-row { display: flex; align-items: center; gap: .5rem }
+    .checkbox-row input { width: auto }
+    .checkbox-row label { text-transform: none; letter-spacing: 0; font-size: .88rem; color: var(--tx2); margin: 0 }
+    .save-status { font-size: .8rem; color: var(--green); font-family: var(--fm); min-height: 1.2em }
+
+    /* CONTENT TAB */
+    .content-form { max-width: 600px }
+    .content-row { display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem }
+    .content-row .field { flex: 1; margin-bottom: 0 }
+    .content-key { font-family: var(--fm); font-size: .8rem; color: var(--ac); }
+
+    /* TAB PANEL */
+    .tab-panel { display: none }
+    .tab-panel.active { display: block }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--sf2);
+      border: 1px solid var(--bd2); color: var(--tx); padding: .8rem 1.2rem;
+      border-radius: 8px; font-size: .85rem; z-index: 9999; opacity: 0;
+      transform: translateY(10px); transition: opacity .3s, transform .3s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: none }
+    .toast.success { border-color: var(--green); }
+    .toast.error { border-color: var(--red); }
+
+    @media (max-width: 700px) {
+      :root { --sb: 0px }
+      .sidebar { transform: translateX(-220px); transition: transform .3s; width: 220px }
+      .sidebar.open { transform: none }
+      .main { margin-left: 0; padding: 1rem }
+      .field-row { grid-template-columns: 1fr }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">TFS Admin</div>
+    <div class="login-sub">tahafurkansen.com.tr</div>
+    <div class="form-field">
+      <label>Kullanıcı Adı</label>
+      <input type="text" id="l-user" autocomplete="username" />
+    </div>
+    <div class="form-field">
+      <label>Şifre</label>
+      <input type="password" id="l-pass" autocomplete="current-password" />
+    </div>
+    <button class="btn-login" onclick="doLogin()">Giriş Yap</button>
+    <div class="login-err" id="l-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sb-logo">
+        <div class="sb-logo-text">TFS Admin</div>
+        <div class="sb-logo-sub">panel v1.0</div>
+      </div>
+      <nav class="sb-nav">
+        <div class="nav-item active" onclick="showTab('dashboard')" id="nav-dashboard">
+          <span class="nav-icon">◈</span> Dashboard
+        </div>
+        <div class="nav-item" onclick="showTab('messages')" id="nav-messages">
+          <span class="nav-icon">✉</span> Mesajlar
+          <span class="nav-badge" id="unread-badge" style="display:none"></span>
+        </div>
+        <div class="nav-item" onclick="showTab('posts')" id="nav-posts">
+          <span class="nav-icon">✍</span> Blog Yazıları
+        </div>
+        <div class="nav-item" onclick="showTab('projects')" id="nav-projects">
+          <span class="nav-icon">◻</span> Projeler
+        </div>
+        <div class="nav-item" onclick="showTab('content')" id="nav-content">
+          <span class="nav-icon">⊞</span> Site İçeriği
+        </div>
+      </nav>
+      <div class="sb-bottom">
+        <div class="sb-user" id="sb-username">—</div>
+        <button class="btn-logout" onclick="logout()">Çıkış Yap</button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- DASHBOARD -->
+      <div class="tab-panel active" id="tab-dashboard">
+        <div class="page-header">
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub" id="dash-date"></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card unread">
+            <div class="stat-label">Okunmamış Mesaj</div>
+            <div class="stat-val" id="s-unread">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Toplam Mesaj</div>
+            <div class="stat-val" id="s-msgs">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Blog Yazısı</div>
+            <div class="stat-val" id="s-posts">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Proje</div>
+            <div class="stat-val" id="s-projs">—</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Son Mesajlar</span></div>
+          <table>
+            <thead><tr><th>Gönderen</th><th>Konu</th><th>Tarih</th><th>Durum</th></tr></thead>
+            <tbody id="dash-msgs"><tr class="empty-row"><td colspan="4">Yükleniyor...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="tab-panel" id="tab-messages">
+        <div class="page-header">
+          <div class="page-title">Mesajlar</div>
+          <div class="page-sub">İletişim formundan gelen mesajlar</div>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Gönderen</th><th>E-posta</th><th>Konu / Mesaj</th><th>Tarih</th><th>İşlem</th></tr></thead>
+            <tbody id="msgs-tbody"><tr class="empty-row"><td colspan="5">Yükleniyor...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- POSTS -->
+      <div class="tab-panel" id="tab-posts">
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div class="page-title">Blog Yazıları</div>
+            <div class="page-sub">Yazı ekle, düzenle veya sil</div>
+          </div>
+          <button class="btn-primary" onclick="openPostModal()">+ Yeni Yazı</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Başlık</th><th>Slug</th><th>Durum</th><th>Tarih</th><th>İşlem</th></tr></thead>
+            <tbody id="posts-tbody"><tr class="empty-row"><td colspan="5">Yükleniyor...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="tab-panel" id="tab-projects">
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div class="page-title">Projeler</div>
+            <div class="page-sub">Portfolio projelerini yönet</div>
+          </div>
+          <button class="btn-primary" onclick="openProjModal()">+ Yeni Proje</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Proje</th><th>Teknolojiler</th><th>Öne Çıkan</th><th>Sıra</th><th>İşlem</th></tr></thead>
+            <tbody id="projs-tbody"><tr class="empty-row"><td colspan="5">Yükleniyor...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="tab-panel" id="tab-content">
+        <div class="page-header">
+          <div class="page-title">Site İçeriği</div>
+          <div class="page-sub">Sitedeki anahtar içerikleri düzenle</div>
+        </div>
+        <div class="card content-form" style="padding:1.5rem">
+          <div id="content-fields">Yükleniyor...</div>
+          <div style="margin-top:1.5rem;display:flex;gap:.8rem;align-items:center">
+            <button class="btn-primary" onclick="saveContent()">Kaydet</button>
+            <span class="save-status" id="content-status"></span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- POST MODAL -->
+<div class="modal-bg" id="post-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="post-modal-title">Yeni Yazı</span>
+      <button class="modal-close" onclick="closeModal('post-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pm-id" />
+      <div class="field"><label>Başlık *</label><input type="text" id="pm-title" placeholder="Yazı başlığı" /></div>
+      <div class="field"><label>Özet</label><input type="text" id="pm-excerpt" placeholder="Kısa açıklama" /></div>
+      <div class="field"><label>İçerik (Markdown destekli)</label><textarea id="pm-content" style="min-height:220px" placeholder="## Giriş&#10;&#10;İçeriğinizi buraya yazın..."></textarea></div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="pm-published" />
+        <label for="pm-published">Yayınla (herkese görünür)</label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeModal('post-modal')">İptal</button>
+      <button class="btn-primary" onclick="savePost()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECT MODAL -->
+<div class="modal-bg" id="proj-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="proj-modal-title">Yeni Proje</span>
+      <button class="modal-close" onclick="closeModal('proj-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pjm-id" />
+      <div class="field"><label>Proje Adı *</label><input type="text" id="pjm-title" placeholder="Proje adı" /></div>
+      <div class="field"><label>Açıklama</label><textarea id="pjm-desc" style="min-height:80px" placeholder="Projeyi kısaca anlat"></textarea></div>
+      <div class="field-row">
+        <div class="field"><label>Proje URL</label><input type="url" id="pjm-url" placeholder="https://..." /></div>
+        <div class="field"><label>GitHub URL</label><input type="url" id="pjm-github" placeholder="https://github.com/..." /></div>
+      </div>
+      <div class="field"><label>Teknolojiler (virgülle ayır)</label><input type="text" id="pjm-tech" placeholder="React, TypeScript, Node.js" /></div>
+      <div class="field-row">
+        <div class="field"><label>Sıra (küçük = üste)</label><input type="number" id="pjm-order" value="0" min="0" /></div>
+        <div class="field" style="display:flex;align-items:flex-end;padding-bottom:.2rem">
+          <div class="checkbox-row">
+            <input type="checkbox" id="pjm-featured" />
+            <label for="pjm-featured">Öne çıkar</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeModal('proj-modal')">İptal</button>
+      <button class="btn-primary" onclick="saveProject()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+let TOKEN = null;
+let STATE = { messages: [], posts: [], projects: [], content: {} };
+
+// ─── AUTH ───
+async function doLogin() {
+  const u = document.getElementById('l-user').value.trim();
+  const p = document.getElementById('l-pass').value;
+  const err = document.getElementById('l-err');
+  err.textContent = '';
+  if (!u || !p) { err.textContent = 'Kullanıcı adı ve şifre girin'; return; }
+
+  try {
+    const r = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: u, password: p })
+    });
+    const d = await r.json();
+    if (!r.ok) { err.textContent = d.error || 'Giriş başarısız'; return; }
+
+    TOKEN = d.token;
+    localStorage.setItem('admin_token', TOKEN);
+    localStorage.setItem('admin_user', d.username);
+    showApp(d.username);
+  } catch {
+    err.textContent = 'Bağlantı hatası';
+  }
+}
+
+function logout() {
+  TOKEN = null;
+  localStorage.removeItem('admin_token');
+  localStorage.removeItem('admin_user');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function showApp(username) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('sb-username').textContent = username || 'admin';
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('tr-TR', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+  loadAll();
+}
+
+// ─── API ───
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${TOKEN}`,
+      ...(opts.headers || {})
+    },
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  if (res.status === 401) { logout(); return null; }
+  return res.json();
+}
+
+async function loadAll() {
+  const [msgs, posts, projs, content] = await Promise.all([
+    api('/api/messages'),
+    api('/api/posts'),
+    api('/api/projects'),
+    api('/api/content')
+  ]);
+  if (msgs) STATE.messages = msgs.messages || [];
+  if (posts) STATE.posts = posts.posts || [];
+  if (projs) STATE.projects = projs.projects || [];
+  if (content) STATE.content = content.content || {};
+
+  renderAll();
+}
+
+// ─── RENDER ───
+function renderAll() {
+  renderStats();
+  renderDashMsgs();
+  renderMessages();
+  renderPosts();
+  renderProjects();
+  renderContent();
+}
+
+function renderStats() {
+  const unread = STATE.messages.filter(m => !m.is_read).length;
+  document.getElementById('s-unread').textContent = unread;
+  document.getElementById('s-msgs').textContent = STATE.messages.length;
+  document.getElementById('s-posts').textContent = STATE.posts.length;
+  document.getElementById('s-projs').textContent = STATE.projects.length;
+
+  const badge = document.getElementById('unread-badge');
+  if (unread > 0) { badge.textContent = unread; badge.style.display = ''; }
+  else badge.style.display = 'none';
+}
+
+function fmtDate(dt) {
+  if (!dt) return '—';
+  return new Date(dt).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function renderDashMsgs() {
+  const tbody = document.getElementById('dash-msgs');
+  const latest = STATE.messages.slice(0, 5);
+  if (!latest.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Henüz mesaj yok</td></tr>';
+    return;
+  }
+  tbody.innerHTML = latest.map(m => `
+    <tr class="${m.is_read ? '' : 'msg-unread'}">
+      <td>${esc(m.name)}</td>
+      <td>${esc(m.subject || '—')}</td>
+      <td>${fmtDate(m.created_at)}</td>
+      <td><span class="tag ${m.is_read ? 'tag-gray' : 'tag-yellow'}">${m.is_read ? 'Okundu' : 'Yeni'}</span></td>
+    </tr>`).join('');
+}
+
+function renderMessages() {
+  const tbody = document.getElementById('msgs-tbody');
+  if (!STATE.messages.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Henüz mesaj yok</td></tr>';
+    return;
+  }
+  tbody.innerHTML = STATE.messages.map(m => `
+    <tr class="${m.is_read ? '' : 'msg-unread'}">
+      <td><strong>${esc(m.name)}</strong></td>
+      <td><a href="mailto:${esc(m.email)}" style="color:var(--ac);text-decoration:none">${esc(m.email)}</a></td>
+      <td>
+        <div style="font-weight:600;margin-bottom:.2rem">${esc(m.subject || '(konu yok)')}</div>
+        <div class="msg-text" style="color:var(--mu);font-size:.8rem">${esc(m.message)}</div>
+      </td>
+      <td style="white-space:nowrap">${fmtDate(m.created_at)}</td>
+      <td style="white-space:nowrap">
+        ${m.is_read ? '' : `<button class="act-btn" onclick="markRead(${m.id})">Okundu</button>`}
+        <button class="act-btn danger" onclick="deleteMsg(${m.id})">Sil</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderPosts() {
+  const tbody = document.getElementById('posts-tbody');
+  if (!STATE.posts.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Henüz yazı yok — yeni yazı ekle</td></tr>';
+    return;
+  }
+  tbody.innerHTML = STATE.posts.map(p => `
+    <tr>
+      <td><strong>${esc(p.title)}</strong></td>
+      <td><span style="font-family:var(--fm);font-size:.78rem;color:var(--mu)">${esc(p.slug)}</span></td>
+      <td><span class="tag ${p.published ? 'tag-green' : 'tag-gray'}">${p.published ? 'Yayında' : 'Taslak'}</span></td>
+      <td style="white-space:nowrap">${fmtDate(p.created_at)}</td>
+      <td style="white-space:nowrap">
+        <button class="act-btn" onclick="editPost(${p.id})">Düzenle</button>
+        <button class="act-btn danger" onclick="deletePost(${p.id})">Sil</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderProjects() {
+  const tbody = document.getElementById('projs-tbody');
+  if (!STATE.projects.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Henüz proje yok — yeni proje ekle</td></tr>';
+    return;
+  }
+  tbody.innerHTML = STATE.projects.map(p => {
+    const tech = Array.isArray(p.tech_stack) ? p.tech_stack : [];
+    return `<tr>
+      <td>
+        <strong>${esc(p.title)}</strong>
+        ${p.url ? `<br><a href="${esc(p.url)}" target="_blank" style="color:var(--mu);font-size:.78rem">${esc(p.url)}</a>` : ''}
+      </td>
+      <td>${tech.map(t => `<span class="tag tag-gray" style="margin:.1rem">${esc(t)}</span>`).join('')}</td>
+      <td>${p.featured ? '<span class="tag tag-yellow">★ Öne Çıkan</span>' : '—'}</td>
+      <td>${p.order_index}</td>
+      <td style="white-space:nowrap">
+        <button class="act-btn" onclick="editProject(${p.id})">Düzenle</button>
+        <button class="act-btn danger" onclick="deleteProject(${p.id})">Sil</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderContent() {
+  const div = document.getElementById('content-fields');
+  const c = STATE.content;
+  const fields = [
+    { key: 'bio', label: 'Bio / Hakkımda', type: 'textarea' },
+    { key: 'location', label: 'Konum', type: 'text' },
+    { key: 'email', label: 'E-posta', type: 'text' },
+    { key: 'available_for_work', label: 'İş teklifine açık mısın?', type: 'select', opts: ['true','false'] },
+  ];
+  div.innerHTML = fields.map(f => {
+    if (f.type === 'textarea') return `
+      <div class="field">
+        <label><span class="content-key">${f.key}</span> — ${f.label}</label>
+        <textarea id="cf-${f.key}" style="min-height:80px">${esc(c[f.key] || '')}</textarea>
+      </div>`;
+    if (f.type === 'select') return `
+      <div class="field">
+        <label><span class="content-key">${f.key}</span> — ${f.label}</label>
+        <select id="cf-${f.key}">
+          ${f.opts.map(o => `<option value="${o}" ${c[f.key] === o ? 'selected' : ''}>${o}</option>`).join('')}
+        </select>
+      </div>`;
+    return `
+      <div class="field">
+        <label><span class="content-key">${f.key}</span> — ${f.label}</label>
+        <input type="${f.type}" id="cf-${f.key}" value="${esc(c[f.key] || '')}" />
+      </div>`;
+  }).join('');
+}
+
+// ─── MESSAGES ACTIONS ───
+async function markRead(id) {
+  await api(`/api/messages/${id}`, { method: 'PATCH' });
+  const m = STATE.messages.find(x => x.id === id);
+  if (m) m.is_read = 1;
+  renderAll();
+  toast('Mesaj okundu olarak işaretlendi', 'success');
+}
+
+async function deleteMsg(id) {
+  if (!confirm('Bu mesajı silmek istediğine emin misin?')) return;
+  await api(`/api/messages/${id}`, { method: 'DELETE' });
+  STATE.messages = STATE.messages.filter(m => m.id !== id);
+  renderAll();
+  toast('Mesaj silindi', 'success');
+}
+
+// ─── POSTS ACTIONS ───
+function openPostModal(post = null) {
+  document.getElementById('post-modal-title').textContent = post ? 'Yazıyı Düzenle' : 'Yeni Yazı';
+  document.getElementById('pm-id').value = post ? post.id : '';
+  document.getElementById('pm-title').value = post ? post.title : '';
+  document.getElementById('pm-excerpt').value = post ? (post.excerpt || '') : '';
+  document.getElementById('pm-content').value = post ? (post.content || '') : '';
+  document.getElementById('pm-published').checked = post ? !!post.published : false;
+  document.getElementById('post-modal').classList.add('open');
+}
+
+async function editPost(id) {
+  const d = await api(`/api/posts/${id}`);
+  if (d && d.post) openPostModal(d.post);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open') }
+
+async function savePost() {
+  const id = document.getElementById('pm-id').value;
+  const body = {
+    title: document.getElementById('pm-title').value.trim(),
+    excerpt: document.getElementById('pm-excerpt').value.trim(),
+    content: document.getElementById('pm-content').value,
+    published: document.getElementById('pm-published').checked
+  };
+  if (!body.title) { toast('Başlık zorunludur', 'error'); return; }
+
+  if (id) {
+    await api(`/api/posts/${id}`, { method: 'PUT', body });
+  } else {
+    await api('/api/posts', { method: 'POST', body });
+  }
+  closeModal('post-modal');
+  const d = await api('/api/posts');
+  if (d) STATE.posts = d.posts || [];
+  renderPosts();
+  toast(id ? 'Yazı güncellendi' : 'Yazı oluşturuldu', 'success');
+}
+
+async function deletePost(id) {
+  if (!confirm('Bu yazıyı silmek istediğine emin misin?')) return;
+  await api(`/api/posts/${id}`, { method: 'DELETE' });
+  STATE.posts = STATE.posts.filter(p => p.id !== id);
+  renderPosts();
+  renderStats();
+  toast('Yazı silindi', 'success');
+}
+
+// ─── PROJECTS ACTIONS ───
+function openProjModal(proj = null) {
+  document.getElementById('proj-modal-title').textContent = proj ? 'Projeyi Düzenle' : 'Yeni Proje';
+  document.getElementById('pjm-id').value = proj ? proj.id : '';
+  document.getElementById('pjm-title').value = proj ? proj.title : '';
+  document.getElementById('pjm-desc').value = proj ? (proj.description || '') : '';
+  document.getElementById('pjm-url').value = proj ? (proj.url || '') : '';
+  document.getElementById('pjm-github').value = proj ? (proj.github_url || '') : '';
+  const tech = proj ? (Array.isArray(proj.tech_stack) ? proj.tech_stack : []) : [];
+  document.getElementById('pjm-tech').value = tech.join(', ');
+  document.getElementById('pjm-order').value = proj ? (proj.order_index || 0) : 0;
+  document.getElementById('pjm-featured').checked = proj ? !!proj.featured : false;
+  document.getElementById('proj-modal').classList.add('open');
+}
+
+function editProject(id) {
+  const proj = STATE.projects.find(p => p.id === id);
+  if (proj) openProjModal(proj);
+}
+
+async function saveProject() {
+  const id = document.getElementById('pjm-id').value;
+  const techRaw = document.getElementById('pjm-tech').value;
+  const tech_stack = techRaw.split(',').map(t => t.trim()).filter(Boolean);
+  const body = {
+    title: document.getElementById('pjm-title').value.trim(),
+    description: document.getElementById('pjm-desc').value.trim(),
+    url: document.getElementById('pjm-url').value.trim(),
+    github_url: document.getElementById('pjm-github').value.trim(),
+    tech_stack,
+    order_index: parseInt(document.getElementById('pjm-order').value) || 0,
+    featured: document.getElementById('pjm-featured').checked
+  };
+  if (!body.title) { toast('Proje adı zorunludur', 'error'); return; }
+
+  if (id) {
+    await api(`/api/projects/${id}`, { method: 'PUT', body });
+  } else {
+    await api('/api/projects', { method: 'POST', body });
+  }
+  closeModal('proj-modal');
+  const d = await api('/api/projects');
+  if (d) STATE.projects = d.projects || [];
+  renderProjects();
+  toast(id ? 'Proje güncellendi' : 'Proje eklendi', 'success');
+}
+
+async function deleteProject(id) {
+  if (!confirm('Bu projeyi silmek istediğine emin misin?')) return;
+  await api(`/api/projects/${id}`, { method: 'DELETE' });
+  STATE.projects = STATE.projects.filter(p => p.id !== id);
+  renderProjects();
+  renderStats();
+  toast('Proje silindi', 'success');
+}
+
+// ─── CONTENT ───
+async function saveContent() {
+  const keys = ['bio', 'location', 'email', 'available_for_work'];
+  const updates = keys.map(key => {
+    const el = document.getElementById(`cf-${key}`);
+    return { key, value: el ? el.value : '' };
+  });
+  await api('/api/content', { method: 'PUT', body: { updates } });
+  updates.forEach(({ key, value }) => { STATE.content[key] = value; });
+  document.getElementById('content-status').textContent = '✓ Kaydedildi';
+  setTimeout(() => { document.getElementById('content-status').textContent = ''; }, 3000);
+  toast('İçerik kaydedildi', 'success');
+}
+
+// ─── NAV ───
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  document.getElementById(`nav-${name}`).classList.add('active');
+}
+
+// ─── TOAST ───
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  setTimeout(() => { el.classList.remove('show'); }, 3000);
+}
+
+// ─── UTILS ───
+function esc(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Modal dışına tıklayınca kapat
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+});
+
+// Enter ile login
+document.getElementById('l-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ─── INIT ───
+(function init() {
+  const saved = localStorage.getItem('admin_token');
+  const user = localStorage.getItem('admin_user');
+  if (saved) {
+    TOKEN = saved;
+    showApp(user);
+  }
+})();
+</script>
+</body>
+</html>
