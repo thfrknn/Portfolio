@@ -1,0 +1,19 @@
+# Cloudflare Pages + Functions + D1 yapılandırması
+# Kurulum adımları:
+#   1. npm install -g wrangler
+#   2. wrangler login
+#   3. wrangler d1 create portfolio-db   --> çıkan database_id'yi aşağıya yapıştır
+#   4. wrangler d1 execute portfolio-db --file=schema.sql  --> şemayı uygula
+#   5. Cloudflare Dashboard > Pages > Settings > Environment Variables'a ekle:
+#        ADMIN_USERNAME  = istedigin kullanici adi
+#        ADMIN_PASSWORD  = istedigin sifre
+#        JWT_SECRET      = rastgele uzun bir string (orn: openssl rand -hex 32)
+
+name = "portfolio"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portfolio-db"
+database_id = "BURAYA_D1_DATABASE_ID_YAZ"
