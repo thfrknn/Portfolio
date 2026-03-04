@@ -4,3 +4,8 @@ compatibility_flags = ["nodejs_compat"]
 
 [assets]
 directory = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portfolio-db"
+database_id = "ae595e9d-d1ef-45b9-bb77-e8748b7afc6b"
